@@ -160,7 +160,7 @@ class main():
             Label(self.root,text="Security Code:",bg='grey',fg='white').place(x=21,y=230)#security code
 
             Button(self.root,text="Create Account",height=1,width=13,bg="grey",fg="white",command=self.CheckCreds).place(x=21,y=270)
-            Button(self.root,text="Login",height=1,width=6,bg="grey",fg="white",command=lambda: [self.root.destroy(), main.login()]).place(x=125,y=270)
+            Button(self.root,text="Login",height=1,width=6,bg="grey",fg="white",command=self.LoginButtonRegister, main.login()]).place(x=125,y=270)
 
             ques_img=PhotoImage(file='dat/question_mark.png')
             ques=Button(self.root,text="",command=self.HelpRegister)
