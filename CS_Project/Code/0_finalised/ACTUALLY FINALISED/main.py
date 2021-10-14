@@ -188,7 +188,7 @@ class main():
             PWord=self.pswd.get()
             CFirm=self.cnfrm.get()
             cur.execute(f"SELECT username FROM users WHERE username='{UName}';")
-            if UName=="" or PWord=="":
+            if UName=="" or PWord=="" or CFirm=="":
                 messagebox.showerror("Register Panel","No entries given")
             elif len(PWord)>10 or len(CFirm)>10 or len(UName)>10:
                 messagebox.showerror("Register Panel","Entries exceed limit")
