@@ -72,8 +72,11 @@ class main():
         self.clock.place(x=1250,y=-4)
 
         Label(self.root,text=f"{dt.datetime.now():%a %d %b %Y}",fg="black",bg="#EB998E",font=("",20,'bold'),width=12,
-        height=1,relief=RAISED).place(x=1020,y=12) ### CHANGE THE PLACEMENT, SIZE, FONT ETC OF THIS
-        
+              height=1,relief=RAISED).place(x=1020,y=12)
+        """
+        Label(self.root,text=f"{dt.datetime.now():%B %d, %Y}",fg="white",bg="grey",font=("",11),width=12,
+              height=1).place(x=220,y=50) ### Might change to
+        """
         self.DigClockMain()
         self.root.mainloop()
 
@@ -105,15 +108,15 @@ class main():
 
     def Start_t(self):
         #Starts the timer on screen
-        print("")
+        print("") #null
 
     def Stop_t(self):
         #Stops the timer on screen
-        print("")
+        print("") #null
 
     def Reset_t(self):
         #Resets the timer on screen
-        print("")
+        print("") #null
 
     def Notes(self):
         self.root=Tk()
