@@ -1,0 +1,263 @@
+START PROGRAM
+
+CONNECT to database
+Date = GET DATE %DD%MM%YYYY
+Time = GET TIME
+
+MAIN WINDOW:
+	SET window title = "Assignment Organiser"
+	SET background colour
+	SET dimensions
+	
+	PLACE Footer
+		username,
+		Date DD/MM/YYYY
+		"UID" security code
+		"Session" session timer
+		
+	PLACE Calendar, x()y()
+	PLACE Notes Button, x()y()
+		IF INPUT ON calendar THEN
+			IF INPUT = Notes Button THEN
+				OPEN Notes window
+	
+	PLACE Time, x()y()
+	
+	PLACE Spreadsheet, x()y()
+	
+	PLACE Add_Tbl Button, x()y()
+	PLACE Select_Tbl Button, x()y()
+	
+	IF INPUT = Add_Tbl Button THEN
+		OPEN Files
+		GET timetable
+		CLONE timetable to user dir
+		OUTPUT timetable
+		
+	IF INPUT = Select_Tbl Button THEN
+		OPEN Files to user dir
+		GET Timetable
+		OUTPUT timetable
+	
+	PLACE menu bar (LEFT, x()y())
+	PLACE Logout Button ON menu bar, x()y()
+	PLACE Timer Button ON menu bar, x()y()
+	
+	IF INPUT = Logout Button THEN
+		CLOSE window
+		OPEN Login window
+		
+	IF INPUT = Timer Button THEN
+		OPEN Timer window
+		
+	
+		
+RESET WINDOW:
+	SET window title = "Reset Password"
+	SET background colour
+	SET dimensions
+	
+	PLACE TEXT "Reset Password", x()y()
+	PLACE TEXT "Username", x(0y()
+	PLACE INPUT box(), x()y()
+	PLACE TEXT "Security Code", x()y()
+	PLACE INPUT box(), x()y()
+	PLACE Change Try, x()y()
+	
+	IF INPUT = Try Button THEN
+		IF username matches security code FROM entry in database THEN
+			OPEN new window
+			SET window title = "New Password"
+			SET background colour
+			SET dimensions
+		
+			PLACE TEXT "New password", x()y()
+			PLACE INPUT box(), x()y()
+			PLACE TEXT "Confirm", x()y()
+			PLACE INPUT box()
+			PLACE Change Button, x()y()
+		
+			IF INPUT = Change Button THEN
+				IF New password = Confirm new password THEN
+					REPLACE password in database with new password
+					CLOSE window
+					OPEN Login window
+				
+				ELSE
+					OUTPUT "Entries do not match"
+		
+		ELSE
+			OUTPUT "Entries do not match"
+
+LOGIN WINDOW
+	SET window title = "Login Panel"
+	SET background colour
+	SET dimensions
+	
+	PLACE TEXT "Login Credentials", x()y()
+	
+	PLACE TEXT "Login:", x()y()
+	PLACE INPUT box(), x()y()
+	PLACE TEXT "Password:", x()y()
+	PLACE INPUT box(), x()y()
+	
+	PLACE Login Button, x()y()
+	PLACE  Register Button, x()y()
+	
+	IF INPUT = Login Button THEN
+		IF Login and Password match entry in database THEN
+			CLOSE window
+			OPEN main program window
+			
+		ELSE
+			OUTPUT "Invalid credentials"
+			
+	IF INPUT = Register Button THEN
+		CLOSE window
+		OPEN register window
+	
+	PLACE Time, x()y()
+	WHILE program is running, refresh TIME
+	OUTPUT TIME ON Time
+
+	PLACE Date, x()y()
+	
+	IF INPUT = CLOSE program THEN
+		CLOSE window
+		
+REGISTER WINDOW
+	SET window title = "Register Panel"
+	SET background colour
+	SET dimensions
+	
+	PLACE TEXT "Create new account", x()y()
+	
+	PLACE TEXT "Username:", x()y()
+	PLACE INPUT box(), x()y()
+	PLACE TEXT "Password:", x()y()
+	PLACE INPUT box(), x()y()
+	PLACE TEXT "Confirm Password:", x()y()
+	PLACE INPUT box(), x()y()
+	
+	PLACE Login Button, x()y()
+	PLACE Register Button, x()y()
+	
+	IF INPUT = Login Button THEN
+		CLOSE window
+		OPEN login window
+
+	IF INPUT = Register Button THEN
+		IF username = BLANK or password = BLANK or confirm password == BLANK THEN
+			OUTPUT "Invalid input"
+		ELSEIF password != confirm password THEN
+			OUTPUT "Passwords do not match"
+		ELSEIF username INPUT is in database THEN
+			OUTPUT "Username is already taken"
+		ELSE:
+			Generate random security code
+			OUTPUT security code
+			ADD username, password, security code to database
+			CREATE new user folder in path
+			ADD user folder to database
+			CLOSE window
+			OPEN login window
+			
+TIMER WINDOW
+	SET window title = "Timer and Stopwatch"
+	SET background colour
+	SET dimensions
+
+	Tick = HR%MIN%SEC
+	Countdown = HR%MIN%SEC
+	
+	PLACE Start_Stopwatch Button, x()y()
+	PLACE Stop_Stopwatch Button, x()y()
+	PLACE Reset_Stopwatch Button, x()y()
+	PLACE Tick, x()y()
+	
+	PLACE Start_Countdown Button, x()y()
+	PLACE Stop_Countdown Button, x()y()
+	PLACE Reset_Countdown Button, x()y()
+	PLACE Countdown, x()y()
+	PLACE Hour+ Button, x()y()
+	PLACE Min+ Button, x()y()
+	PLACE Sec+ Button, x()y()
+	PLACE Hour- Button, x()y()
+	PLACE Min- Button, x()y()
+	PLACE Sec- Button, x()y()
+	
+	IF INPUT = Start_Stopwatch Button THEN
+		START Stopwatch
+		FOR every second Tick=Tick+1sec
+			OUTPUT %SEC+1
+			IF %SEC = 59 THEN
+				Tick+1=%MIN+1%SEC=00
+			IF %MIN = 59 THEN
+				Tick+1=%HR+1%MIN==00%SEC==00
+				
+	IF INPUT = Stop_Stopwatch Button THEN
+		STOP Stopwatch
+		
+	IF INPUT = Reset_Stopwatch Button THEN
+		RESET Stopwatch
+		
+	IF INPUT = Start_Countdown Button THEN
+		START Countdown
+		FOR every second Tick=Tick-1sec
+			OUTPUT %SEC-1
+			IF %SEC = 59 THEN
+				Tick-1=%MIN-1%SEC=00
+			IF %MIN = 59 THEN
+				Tick-1=%HR-1%MIN==00%SEC==00
+		
+	IF INPUT = Stop_Countdown Button THEN
+		STOP Countdown
+		
+	IF INPUT = Reset_Countdown Button THEN
+		RESET Countdown
+		
+	IF INPUT = Hour+ Button THEN
+		OUTPUT Hour+1
+	
+	IF INPUT = Hour- Button THEN
+		OUTPUT Hour-1
+		
+	IF INPUT = Min+ Button THEN
+		OUTPUT Min+1
+	
+	IF INPUT = Min- Button THEN
+		OUTPUT Min-1
+		
+	IF INPUT = Sec+ Button THEN
+		OUTPUT Sec+1
+	
+	IF INPUT = Sec- Button THEN
+		OUTPUT Sec-1
+				
+NOTES WINDOW
+	SET window title = "Day Notes"
+	SET background colour
+	SET dimensions
+	
+	GET Date
+	PLACE INPUT box(), x()y()
+	
+	PLACE Upload_Notes Button, x()y()
+	PLACE Save Button, x()y()
+	PLACE Return Button, x()y()
+	
+	IF INPUT = Upload_Notes Button THEN
+		OPEN Files
+		SELECT TEXT file, extension = '.txt'
+		OUTPUT file
+		
+	IF INPUT = Save Button THEN
+		WRITE to TXT .txt file changes
+		COPY TXT file to local path folder
+		RENAME TXT file to DD/MM/YYYY + "Notes"
+		ADD TXT path to database
+		
+	IF INPUT = Return Button THEN
+		CLOSE window
+		
+END PROGRAM
