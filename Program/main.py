@@ -1,8 +1,8 @@
 from tkinter import *
+from tkinter import ttk,messagebox,filedialog
 import datetime as dt
 import sqlite3,random,time
 import pandas as pd
-from tkinter import ttk,messagebox,filedialog
 
 con=sqlite3.connect('C:/Users/ridwa/Documents/CS_Project/Program/dat/db.db')
 cur=con.cursor()
