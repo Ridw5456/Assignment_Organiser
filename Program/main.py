@@ -1,6 +1,6 @@
 from tkinter import *
 import datetime as dt
-import sqlite3, random, time
+import sqlite3,random,time
 import pandas as pd
 from tkinter import ttk,messagebox,filedialog
 
