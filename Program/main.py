@@ -1,8 +1,9 @@
 from tkinter import *
-from tkinter import ttk,messagebox,filedialog
 import datetime as dt
-import sqlite3,random,time
+import sqlite3, random, time
 import pandas as pd
+from tkinter import ttk,messagebox,filedialog
+from tkcalendar import *
 
 con=sqlite3.connect('C:/Users/ridwa/Documents/CS_Project/Program/dat/db.db')
 cur=con.cursor()
@@ -39,52 +40,177 @@ con.commit()
 
 class main():
     def __init__(self,username):
+        #
         self.root=Tk()
         self.root.title("Assignment Organiser")
         self.root.geometry('1400x700')
         self.root.resizable(height=False,width=False)
+        self.root.pack_propagate
         self.root.configure(bg='#6B8282')
         self.root.iconbitmap('dat/notebook ICO.ico')
-
-        Label(self.root,bg="#EB998E",height=70,width=10).place(x=0,y=0)
-        Label(self.root,bg='black',height=1,width=100).place(x=0,y=665)
-        Label(self.root,bg="#EB998E",height=4,width=300).place(x=0,y=0)
-        Label(self.root,bg="#EB998E",height=4,width=100).place(x=0,y=670)
-        
+        #
+        Label(self.root,bg='black',height=1,width=71).place(x=0,y=665)
+        Label(self.root,bg="#EB998E",height=4,width=55).place(x=0,y=0)
+        Label(self.root,bg='black',width=1,height=4).place(x=493,y=665)
+        Label(self.root,bg="#EB998E",height=4,width=71).place(x=0,y=670)
+        #
         logout_img=PhotoImage(file='dat/logout PNG.png')
         logoutb=Button(self.root,text="",command=self.Logout,image=logout_img)
-        logoutb.place(x=12,y=10)
+        logoutb.place(x=9,y=9)
 
         timer_img=PhotoImage(file='dat/timer PNG.png')
-        timerb=Button(self.root,text="",command=self.TimerSW,image=timer_img)
-        timerb.place(x=12,y=70)
-
+        timerb=Button(self.root,text="",command=main.timersw,image=timer_img)
+        timerb.place(x=70,y=9)
+        #
         cur.execute(f"SELECT user_id FROM users WHERE username='{username}';")
         UID=cur.fetchall()
-
         Label(self.root,text="Username :",font=("",9,'bold'),bg="#EB998E",fg='black').place(x=8,y=673)
         Label(self.root,text=username,font=("",9,'bold'),bg="#EB998E",fg='black').place(x=80,y=673)
         Label(self.root,text="UID :",font=("",9,'bold'),bg="#EB998E",fg='black').place(x=150,y=673)
         Label(self.root,text=UID,font=("",9,'bold'),bg="#EB998E",fg='black').place(x=180,y=673)
+        Label(self.root,text="Session Time :",font=("",9,'bold'),bg="#EB998E",fg='black').place(x=235,y=673)
+        self.start=time.time()
+        self.sessiontime=Label(self.root,text="",font=("",12,'bold'),bg="#EB998E",fg='black',relief=RAISED)
+        self.sessiontime.place(x=330,y=673)
+        #
+        Label(self.root,bg='black',width=1,height=4).place(x=370,y=0)
+        Label(self.root,bg='black',width=1,height=4).place(x=492,y=0)
+        self.clock=Label(self.root,font=("helvetica",20,'bold'),bg="#EB998E",fg="black",width=7,height=2)
+        self.clock.place(x=375,y=-4)
 
-        Label(self.root,bg='black',width=1,height=4).place(x=1245,y=0)
-        self.clock=Label(self.root,font=("helvetica",20,'bold'),bg="#EB998E",fg="black",width=9,height=2)
-        self.clock.place(x=1250,y=-4)
+        self.date=Label(self.root,fg="black",bg="#EB998E",font=("",20,'bold'),width=13,
+                   height=1,relief=RAISED)
+        self.date.place(x=130,y=12)
+        #
+        style=ttk.Style()
+        style.theme_use('clam')
+        CalFrame=ttk.Frame(self.root)
+        CalFrame.place(height=200,width=300,rely=.0937,relx=.786)
+        t=dt.date.today()
+        self.cal=Calendar(CalFrame,selectmode='day',year=t.year,month=t.month,day=t.day)
+        self.cal.pack(fill='both',expand=True)
 
-        Label(self.root,text=f"{dt.datetime.now():%a %d %b %Y}",fg="black",bg="#EB998E",font=("",20,'bold'),width=12,
-              height=1,relief=RAISED).place(x=1020,y=12)
-        """
-        Label(self.root,text=f"{dt.datetime.now():%B %d, %Y}",fg="white",bg="grey",font=("",11),width=12,
-              height=1).place(x=220,y=50) ### Might change to
-        """
+        CalButton=Button(self.root,text="Date",command=self.GetDate).place(x=700,y=200)
+        self.CalLab=Label(self.root,text="")
+        self.CalLab.place(x=700,y=240)
+        #
+        self.TblFrame1=LabelFrame(self.root)
+        self.TblFrame1.place(height=520,width=505,rely=.0937,relx=0)
+
+        self.FileFrame=LabelFrame(self.root,text="Timetable")
+        self.FileFrame.place(height=80,width=505,rely=.835,relx=0)
+
+        self.BrowseFile=Button(self.FileFrame,text="Open",command=self.FileOpen)
+        self.BrowseFile.place(rely=0.5,relx=0.05)
+
+        self.LoadFile=Button(self.FileFrame,text="Load",command=self.FileDat)
+        self.LoadFile.place(rely=0.5,relx=0.2)
+
+        self.Lab1=Label(self.FileFrame,text="No File Selected")
+        self.Lab1.place(rely=0,relx=0)
+
+        self.Tree=ttk.Treeview(self.TblFrame1)
+        self.Tree.place(relheight=1,relwidth=1)
+
+        self.ScrollY=Scrollbar(self.TblFrame1,orient="vertical",command=self.Tree.yview)
+        self.ScrollX=Scrollbar(self.TblFrame1,orient="horizontal",command=self.Tree.xview)
+        self.Tree.configure(xscrollcommand=self.ScrollX.set,yscrollcommand=self.ScrollY.set)
+        self.ScrollX.pack(side="bottom",fill="x")
+        self.ScrollY.pack(side="right",fill="y")
+        #
+        self.SessionClock()
         self.DigClockMain()
+        self.CalMain()
         self.root.mainloop()
+        ###################
+        # Move sign out and timer buttons next to date and time
+        # Shift date and time to LHS
+        # Spreadsheet viewer should be inline with the live time, and the bottom banner should be inline with the speadsheet
+        # Use entire RHS as a text entry Frame
+        # Calendar and calendar buttons go inbetween spreadsheet viewer and text entry
+        ###################
 
+    def GetDate(self):
+        self.CalLab.config(text=self.cal.get_date())
+
+    def SessionClock(self):
+        secs=int(time.time()-self.start) # Change in time from start to current
+        mins=secs//60 # Floor division of seconds to minutes
+        secs=secs%60 # Mod seconds
+        hrs=mins//60 # Floor division of minutes to hours
+        mins=mins%60 # Mod minutes
+        self.sessiontime.config(text="{0}:{1}:{2}".format(int(hrs),int(mins),int(secs))) # Insert into label
+        self.sessiontime.after(100,self.SessionClock) # Refresh time
+
+    def FileOpen(self):
+        OpenFile = filedialog.askopenfilename(initialdir='/',title="Select A File",
+                                              filetype=(("xlsx files", "*.xlsx"),("All Files", "*.*")))
+        self.Lab1['text']=OpenFile
+        return None
+
+    def FileDat(self):
+        Path=self.Lab1['text']
+        try:
+            File=r'{}'.format(Path)
+            if File[-4]=='.csv':
+                self.df=pd.read_csv(File)
+            else:
+                self.df=pd.read_excel(File)
+        except ValueError:
+            messagebox.showerror("","Invalid file type")
+            return None
+        except FileNotFoundError:
+            messagebox.showerror("","File does not exist or has been moved")
+            return None
+
+        self.Purge()
+        self.Tree['column']=list(self.df.columns)
+        self.Tree['show']='headings'
+        for column in self.Tree['columns']:
+            self.Tree.heading(column,text=column)
+
+        dfRows=self.df.to_numpy().tolist()
+        for row in dfRows:
+            self.Tree.insert("","end",values=row)
+            return None
+
+    def Purge(self):
+        self.Tree.delete(*self.Tree.get_children())
+        return None
+
+    class timersw():
+        print("")
+        """
+        def __init__(self):
+            self.root=Tk()
+            self.root.title("Stopwatch and Timer")
+            self.root.geometry('400x300')
+            self.root.resizable(height=False,width=False)
+            self.root.configure(bg='#6B8282')
+            self.root.iconbitmap('dat/timer ICO.ico')
+
+            Button(self.root,text="Start",width=6,height=1,bg="grey",fg="white",command=self.Timer).place(x=50,y=90)
+            #Button(self.root,text="Stop",width=6,height=1,bg="grey",fg="white",command=self.SStop).place(x=125,y=90)
+            #Button(self.root,text="Reset",width=6,height=1,bg="grey",fg="white",command=self.SReset).place(x=200,y=90)
+
+            self.root.mainloop()
+
+        def Timer(self):
+        """     
+            
     def DigClockMain(self):
         try:
             text_input=time.strftime("%H:%M:%S")
             self.clock.config(text=text_input)
-            self.clock.after(2,self.DigClockMain)
+            self.clock.after(100,self.DigClockMain)
+        except:
+            pass
+
+    def CalMain(self):
+        try:
+            text_inp=f"{dt.datetime.now():%a %d %b %Y}"
+            self.date.config(text=text_inp)
+            self.date.after(100,self.CalMain)
         except:
             pass
 
@@ -93,30 +219,6 @@ class main():
         if logoutnow:
             self.root.destroy()
             main.login()
-
-    def TimerSW(self):
-        self.root=Tk()
-        self.root.title("Stopwatch and Timer")
-        self.root.geometry('300x500')
-        self.root.resizable(height=False,width=False)
-        self.root.configure(bg='#6B8282')
-        self.root.iconbitmap('dat/timer ICO.ico')
-
-        Button(self.root,text="Start",width=10,height=1,bg="grey",fg="white",command=self.Start_t) #Place
-        Button(self.root,text="Stop",width=10,height=1,bg="grey",fg="white",command=self.Stop_t) #Place
-        Button(self.root,text="Reset",width=10,height=1,bg="grey",fg="white",command=self.Reset_t) #Place
-
-    def Start_t(self):
-        #Starts the timer on screen
-        print("") #null
-
-    def Stop_t(self):
-        #Stops the timer on screen
-        print("") #null
-
-    def Reset_t(self):
-        #Resets the timer on screen
-        print("") #null
 
     def Notes(self):
         self.root=Tk()
