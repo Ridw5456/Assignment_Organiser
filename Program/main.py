@@ -1,9 +1,11 @@
 from tkinter import *
 import datetime as dt
-import sqlite3, random, time
+import sqlite3,random,time
 import pandas as pd
 from tkinter import ttk,messagebox,filedialog
 from tkcalendar import *
+import os
+from shutil import copyfile
 
 con=sqlite3.connect('C:/Users/ridwa/Documents/CS_Project/Program/dat/db.db')
 cur=con.cursor()
@@ -47,25 +49,27 @@ class main():
         self.root.resizable(height=False,width=False)
         self.root.pack_propagate
         self.root.configure(bg='#6B8282')
-        self.root.iconbitmap('dat/notebook ICO.ico')
+        self.root.iconbitmap('dat/IMG/notebook ICO.ico')
+
+        self.UN=username
         #
         Label(self.root,bg='black',height=1,width=71).place(x=0,y=665)
         Label(self.root,bg="#EB998E",height=4,width=55).place(x=0,y=0)
         Label(self.root,bg='black',width=1,height=4).place(x=493,y=665)
         Label(self.root,bg="#EB998E",height=4,width=71).place(x=0,y=670)
         #
-        logout_img=PhotoImage(file='dat/logout PNG.png')
+        logout_img=PhotoImage(file='dat/IMG/logout PNG.png')
         logoutb=Button(self.root,text="",command=self.Logout,image=logout_img)
         logoutb.place(x=9,y=9)
 
-        timer_img=PhotoImage(file='dat/timer PNG.png')
+        timer_img=PhotoImage(file='dat/IMG/timer PNG.png')
         timerb=Button(self.root,text="",command=main.timersw,image=timer_img)
         timerb.place(x=70,y=9)
         #
         cur.execute(f"SELECT user_id FROM users WHERE username='{username}';")
         UID=cur.fetchall()
         Label(self.root,text="Username :",font=("",9,'bold'),bg="#EB998E",fg='black').place(x=8,y=673)
-        Label(self.root,text=username,font=("",9,'bold'),bg="#EB998E",fg='black').place(x=80,y=673)
+        Label(self.root,text=self.UN,font=("",9,'bold'),bg="#EB998E",fg='black').place(x=80,y=673)
         Label(self.root,text="UID :",font=("",9,'bold'),bg="#EB998E",fg='black').place(x=150,y=673)
         Label(self.root,text=UID,font=("",9,'bold'),bg="#EB998E",fg='black').place(x=180,y=673)
         Label(self.root,text="Session Time :",font=("",9,'bold'),bg="#EB998E",fg='black').place(x=235,y=673)
@@ -84,51 +88,44 @@ class main():
         #
         style=ttk.Style()
         style.theme_use('clam')
-        CalFrame=ttk.Frame(self.root)
-        CalFrame.place(height=200,width=300,rely=.0937,relx=.786)
-        t=dt.date.today()
+        CalFrame=ttk.Frame(self.root) # The frame sits in window (main)
+        CalFrame.place(height=200,width=300,rely=.0937,relx=.786) # Height and placement
+        t=dt.date.today() # Get today date
         self.cal=Calendar(CalFrame,selectmode='day',year=t.year,month=t.month,day=t.day)
-        self.cal.pack(fill='both',expand=True)
+        self.cal.pack(fill='both',expand=True) # Fill entire container
 
         CalButton=Button(self.root,text="Date",command=self.GetDate).place(x=700,y=200)
         self.CalLab=Label(self.root,text="")
         self.CalLab.place(x=700,y=240)
         #
-        self.TblFrame1=LabelFrame(self.root)
-        self.TblFrame1.place(height=520,width=505,rely=.0937,relx=0)
+        self.TblFrame1=LabelFrame(self.root) # Timetable frame
+        self.TblFrame1.place(height=520,width=505,rely=.0937,relx=0) # Place frame
 
-        self.FileFrame=LabelFrame(self.root,text="Timetable")
-        self.FileFrame.place(height=80,width=505,rely=.835,relx=0)
+        self.FileFrame=LabelFrame(self.root,text="Timetable") # File frame
+        self.FileFrame.place(height=80,width=505,rely=.835,relx=0) # Place frame
 
-        self.BrowseFile=Button(self.FileFrame,text="Open",command=self.FileOpen)
-        self.BrowseFile.place(rely=0.5,relx=0.05)
+        self.BrowseFile=Button(self.FileFrame,text="Open",command=self.FileOpen) #Open file button
+        self.BrowseFile.place(rely=0.5,relx=0.05) # Change placement in frame
 
-        self.LoadFile=Button(self.FileFrame,text="Load",command=self.FileDat)
-        self.LoadFile.place(rely=0.5,relx=0.2)
+        self.LoadFile=Button(self.FileFrame,text="Load",command=self.FileDat) # Load button
+        self.LoadFile.place(rely=0.5,relx=0.2) # Change placement in frame
 
-        self.Lab1=Label(self.FileFrame,text="No File Selected")
-        self.Lab1.place(rely=0,relx=0)
+        self.Lab1=Label(self.FileFrame,text="No File Selected") # "No File Selected" label
+        self.Lab1.place(rely=0,relx=0) # Place label in frame
 
-        self.Tree=ttk.Treeview(self.TblFrame1)
-        self.Tree.place(relheight=1,relwidth=1)
+        self.Tree=ttk.Treeview(self.TblFrame1) # Creatine a tree for the spreadsheet file
+        self.Tree.place(relheight=1,relwidth=1) # Place the tree, tree spans entire frame
 
-        self.ScrollY=Scrollbar(self.TblFrame1,orient="vertical",command=self.Tree.yview)
-        self.ScrollX=Scrollbar(self.TblFrame1,orient="horizontal",command=self.Tree.xview)
-        self.Tree.configure(xscrollcommand=self.ScrollX.set,yscrollcommand=self.ScrollY.set)
-        self.ScrollX.pack(side="bottom",fill="x")
-        self.ScrollY.pack(side="right",fill="y")
+        self.ScrollY=Scrollbar(self.TblFrame1,orient="vertical",command=self.Tree.yview) # Vertical scrollbar
+        self.ScrollX=Scrollbar(self.TblFrame1,orient="horizontal",command=self.Tree.xview) # Horizontal scrollbar
+        self.Tree.configure(xscrollcommand=self.ScrollX.set,yscrollcommand=self.ScrollY.set) # Config Scroll X,Y
+        self.ScrollX.pack(side="bottom",fill="x") # Scroller X on x-axis bottom
+        self.ScrollY.pack(side="right",fill="y") # Scroller Y on y-axis right
         #
         self.SessionClock()
         self.DigClockMain()
         self.CalMain()
         self.root.mainloop()
-        ###################
-        # Move sign out and timer buttons next to date and time
-        # Shift date and time to LHS
-        # Spreadsheet viewer should be inline with the live time, and the bottom banner should be inline with the speadsheet
-        # Use entire RHS as a text entry Frame
-        # Calendar and calendar buttons go inbetween spreadsheet viewer and text entry
-        ###################
 
     def GetDate(self):
         self.CalLab.config(text=self.cal.get_date())
@@ -143,39 +140,44 @@ class main():
         self.sessiontime.after(100,self.SessionClock) # Refresh time
 
     def FileOpen(self):
-        OpenFile = filedialog.askopenfilename(initialdir='/',title="Select A File",
+        cwd=os.getcwd() # Currnt working directory
+        os.chdir(cwd+'/dat/usr/'+self.UN) # Change directory to the users
+        OpenFile=filedialog.askopenfilename(initialdir='/',title="Select A File",
                                               filetype=(("xlsx files", "*.xlsx"),("All Files", "*.*")))
-        self.Lab1['text']=OpenFile
+        self.Lab1['text']=OpenFile # Sets Lab1 to the value of OpenFile
+        cwd1=os.getcwd()# Gets the new CWD
+        copyfile(OpenFile,cwd1) # Copies the file into the new CWD (user folder)
+        os.chdir(cwd) # Change the directory back to the original
         return None
 
     def FileDat(self):
-        Path=self.Lab1['text']
+        Path=self.Lab1['text'] # The path label text is now the path
         try:
-            File=r'{}'.format(Path)
-            if File[-4]=='.csv':
-                self.df=pd.read_csv(File)
+            File=r'{}'.format(Path) # 'r' string the path
+            if File[-4]=='.csv': # If the file has extension '.csv'
+                self.df=pd.read_csv(File) # Read as a '.csv'
             else:
-                self.df=pd.read_excel(File)
-        except ValueError:
+                self.df=pd.read_excel(File) # Read as a '.xlsx'
+        except ValueError: # The files arent spreadsheets (.csv/.xlsx)
             messagebox.showerror("","Invalid file type")
             return None
-        except FileNotFoundError:
+        except FileNotFoundError: # The file can no longer be found in the directory
             messagebox.showerror("","File does not exist or has been moved")
             return None
 
-        self.Purge()
-        self.Tree['column']=list(self.df.columns)
-        self.Tree['show']='headings'
-        for column in self.Tree['columns']:
-            self.Tree.heading(column,text=column)
+        self.Purge() # Purge function clears the last Tree
+        self.Tree['column']=list(self.df.columns) # Tree columns
+        self.Tree['show']='headings' # Shows the headings of the Tree
+        for column in self.Tree['columns']: # For every column in the Tree
+            self.Tree.heading(column,text=column) # The column heading becomes the heading in the spreadsheet
 
-        dfRows=self.df.to_numpy().tolist()
-        for row in dfRows:
-            self.Tree.insert("","end",values=row)
+        dfRows=self.df.to_numpy().tolist() # Puts the dataframe through 'NumPy' and 'tolist' to list them
+        for row in dfRows: # For every row
+            self.Tree.insert("","end",values=row) # Insert the row data
             return None
 
     def Purge(self):
-        self.Tree.delete(*self.Tree.get_children())
+        self.Tree.delete(*self.Tree.get_children()) # Clears everything on the Tree
         return None
 
     class timersw():
@@ -187,7 +189,7 @@ class main():
             self.root.geometry('400x300')
             self.root.resizable(height=False,width=False)
             self.root.configure(bg='#6B8282')
-            self.root.iconbitmap('dat/timer ICO.ico')
+            self.root.iconbitmap('dat/IMG/timer ICO.ico')
 
             Button(self.root,text="Start",width=6,height=1,bg="grey",fg="white",command=self.Timer).place(x=50,y=90)
             #Button(self.root,text="Stop",width=6,height=1,bg="grey",fg="white",command=self.SStop).place(x=125,y=90)
@@ -226,7 +228,7 @@ class main():
         self.root.geometry('600x400')
         self.root.resizable(height=False,width=False)
         self.root.configure(bg='#6B8282')
-        self.root.iconbitmap('dat/notes.ico')
+        self.root.iconbitmap('dat/IMG/notes.ico')
 
     class login():
         def __init__(self):
@@ -235,7 +237,7 @@ class main():
             self.root.geometry('355x220')
             self.root.resizable(height=False, width=False)
             self.root.configure(bg='#737171')
-            self.root.iconbitmap('dat/lock ICO.ico')
+            self.root.iconbitmap('dat/IMG/lock ICO.ico')
 
             Label(self.root,text="Login Credentials :",relief=RAISED,font=("helvetica",15),width=16,bg='grey',
                 fg='white').place(x=21,y=15)
@@ -257,7 +259,7 @@ class main():
             self.pswd=Entry(self.root,width=25,show='*')
             self.pswd.place(x=20,y=135)
 
-            reset_img=PhotoImage(file='dat/reset PNG.png')
+            reset_img=PhotoImage(file='dat/IMG/reset PNG.png')
             resetb=Button(self.root,text="",command=self.ResetPassword,image=reset_img)
             resetb.place(x=180,y=110)
 
@@ -270,7 +272,7 @@ class main():
             Label(self.root,text=f"{dt.datetime.now():%a %b%d %Y}",fg="white",bg="grey",font=("",11),width=12,
                 height=1).place(x=220,y=50)
 
-            see_img=PhotoImage(file='dat/view PNG.png')
+            see_img=PhotoImage(file='dat/IMG/view PNG.png')
             see=Button(self.root,text="",command=self.ViewEyeLogin,image=see_img)
             see.place(x=180,y=135)
 
@@ -316,7 +318,7 @@ class main():
             self.root.geometry('355x315')
             self.root.resizable(height=False, width=False)
             self.root.configure(bg='#737171')
-            self.root.iconbitmap('dat/form ICO.ico')
+            self.root.iconbitmap('dat/IMG/form ICO.ico')
 
             Label(self.root,bg="#b6c71c",height=220,width=1).place(x=220,y=0)#lime-yellow 1
             Label(self.root,bg="#f59911",height=220,width=1).place(x=245,y=0)#orange 1
@@ -345,17 +347,17 @@ class main():
             Button(self.root,text="Create Account",height=1,width=13,bg="grey",fg="white",command=self.CheckCreds).place(x=21,y=270)
             Button(self.root,text="Login",height=1,width=6,bg="grey",fg="white",command=self.LoginButtonRegister).place(x=125,y=270)
 
-            ques_img=PhotoImage(file='dat/question_mark PNG.png')
+            ques_img=PhotoImage(file='dat/IMG/question_mark PNG.png')
             ques=Button(self.root,text="",command=self.HelpRegister)
             ques.config(image=ques_img)
             ques.place(x=180,y=270)
 
-            see1_img=PhotoImage(file='dat/view PNG.png')
+            see1_img=PhotoImage(file='dat/IMG/view PNG.png')
             see1=Button(self.root,text="",command=self.ViewTopEye)
             see1.config(image=see1_img)
             see1.place(x=180,y=130)
 
-            see2_img=PhotoImage(file='dat/view PNG.png')
+            see2_img=PhotoImage(file='dat/IMG/view PNG.png')
             see2=Button(self.root,text="",command=self.ViewBottomEye)
             see2.config(image=see2_img)
             see2.place(x=180,y=190)
@@ -386,6 +388,10 @@ class main():
                     if not cur.fetchall():
                         cur.execute(f"INSERT INTO users(username,password,security_code) VALUES('{UName}','{PWord}','{UID}');")
                         con.commit()
+                        cwd=os.getcwd() # Gets current working directory
+                        os.chdir(cwd+'/dat/usr') # Change the current working directory to user folder
+                        os.mkdir(UName) # Make a new directory by the username
+                        os.chdir(cwd) # Change back to the original directory
                         Label(self.root,text=UID,font=("",9),bg='grey',fg='white',width=10).place(x=130,y=230)
                         messagebox.showwarning("Register Panel","Please take note of your security code then proceed to login")
                         self.root.destroy()
@@ -414,7 +420,7 @@ class main():
             self.root.geometry('355x315')
             self.root.resizable(height=False, width=False)
             self.root.configure(bg='#737171')
-            self.root.iconbitmap('dat/reset ICO.ico')
+            self.root.iconbitmap('dat/IMG/reset ICO.ico')
 
             Label(self.root,bg="#b6c71c",height=220,width=1).place(x=220,y=0)#lime-yellow 1
             Label(self.root,bg="#f59911",height=220,width=1).place(x=245,y=0)#orange 1
@@ -444,17 +450,17 @@ class main():
             Button(self.root,text="Reset Password",height=1,width=13,bg="grey",fg="white",command=self.ResetPW).place(x=21,y=270)
             Button(self.root,text="Login",height=1,width=10,bg="grey",fg="white",command=self.Login).place(x=125,y=270)
 
-            see1_img=PhotoImage(file='dat/view PNG.png')
+            see1_img=PhotoImage(file='dat/IMG/view PNG.png')
             see1=Button(self.root,text="",command=self.ViewTopEye)
             see1.config(image=see1_img)
             see1.place(x=180,y=130)
 
-            see2_img=PhotoImage(file='dat/view PNG.png')
+            see2_img=PhotoImage(file='dat/IMG/view PNG.png')
             see2=Button(self.root,text="",command=self.ViewBottomEye)
             see2.config(image=see2_img)
             see2.place(x=180,y=190)
 
-            ques_img=PhotoImage(file='dat/question_mark PNG.png')
+            ques_img=PhotoImage(file='dat/IMG/question_mark PNG.png')
             ques=Button(self.root,text="",command=self.HelpReset)
             ques.config(image=ques_img)
             ques.place(x=180,y=228)
