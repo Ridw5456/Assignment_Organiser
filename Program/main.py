@@ -52,7 +52,7 @@ class main():
         self.root.geometry('1400x700')
         self.root.resizable(height=False,width=False)
         self.root.configure(bg='#6B8282')
-        self.root.iconbitmap('dat/IMG/notebook ICO.ico')
+        self.root.iconbitmap('dat/notebook ICO.ico')
         self.UN=username
         self.startsecs=round(time.time())
         self.starttime=dt.datetime.now().strftime('%H:%M:%S')
@@ -60,7 +60,7 @@ class main():
         Label(self.root,bg="#EB998E",height=4,width=55).place(x=0,y=0)
         Label(self.root,bg='black',width=2,height=2).place(x=430,y=665)
         Label(self.root,bg="#EB998E",height=2,width=62).place(x=0,y=670)
-        logout_img=ImageTk.PhotoImage(file='dat/IMG/logout PNG.png')
+        logout_img=ImageTk.PhotoImage(file='dat/logout PNG.png')
         logoutb=Button(self.root,text="",command=self.Logout,image=logout_img)
         logoutb.place(x=9,y=9)
         self.root.bind('<Escape>',self.Logout)
@@ -146,21 +146,29 @@ class main():
         self.SW=None
         self.clear=False
         self.tick=-1
+        self.suspended = False
+        
         self.SessionClock()
         self.DigClockMain()
         self.CalMain()
         self.root.mainloop()
-        
+         
     def Start(self):
-        self.thread1=threading.Thread(target=self.Tick)
-        self.thread1.start()
+        if int(self.hour.get()) == 0 and int(self.minute.get()) == 0 and int(self.second.get()) == 0:
+            messagebox.showinfo("Stopwatch", "Time not set.")
+        elif int(self.hour.get()) < 0 or int(self.minute.get()) < 0 or int(self.second.get()) < 0:
+            messagebox.showinfo("Stopwatch", "One or more values are less than zero.")
+        else:
+            self.suspended = False
+            self.thread1=threading.Thread(target=self.Tick)
+            self.thread1.start()
         
     def Tick(self):
         try:
             temp=int(self.hour.get())*3600+int(self.minute.get())*60+int(self.second.get())
         except:
             print("Invalid input.")
-        while temp>-1:
+        while self.suspended == False and temp >-1:
             mins,secs=divmod(temp,60)
             hours=0
             if mins>60:
@@ -175,10 +183,15 @@ class main():
             temp-=1
         
     def Stop(self):
-        pass
+        self.suspended = True
         
     def Reset(self):
-        self.clear=True
+        if self.suspended == True:
+            self.hour.set(0)
+            self.minute.set(0)
+            self.second.set(0)
+        else:
+            messagebox.showinfo("Stopwatch","Stop timer before resetting.")
     
     def Logout(self,*args):
         ans=messagebox.askyesno("Logout","Do you want to log out?")
@@ -330,7 +343,7 @@ class main():
             self.SW.geometry('250x230')
             self.SW.resizable(height=False,width=False)
             self.SW.configure(bg='grey')
-            self.SW.iconbitmap('dat/IMG/chart ICO.ico')
+            self.SW.iconbitmap('dat/chart ICO.ico')
             cur.execute(f"SELECT secs FROM sessions WHERE user_id='{self.UID}';")
             secs=[]
             for i in cur.fetchall():
@@ -378,7 +391,7 @@ class main():
             self.root.geometry('355x220')
             self.root.resizable(height=False,width=False)
             self.root.configure(bg='#737171')
-            self.root.iconbitmap('dat/IMG/lock ICO.ico')
+            self.root.iconbitmap('dat/lock ICO.ico')
             Label(self.root,text="Login Credentials :",relief=RAISED,font=("helvetica",15),width=16,bg='grey',
                 fg='white').place(x=21,y=15)
             Label(self.root,bg="#b6c71c",height=22,width=1).place(x=220,y=0)#lime-yellow 1
@@ -394,7 +407,7 @@ class main():
             Label(self.root,text="Password:",bg="grey",fg="white").place(x=20,y=115)
             self.pswd=Entry(self.root,width=25,show='*')
             self.pswd.place(x=20,y=135)          
-            img_reset=ImageTk.PhotoImage(file='dat/IMG/reset PNG.png')
+            img_reset=ImageTk.PhotoImage(file='dat/reset PNG.png')
             resetb=Button(self.root,text="",command=self.ResetPassword,image=img_reset)
             resetb.place(x=180,y=110)
             Button(self.root,text="Register",width=10,height=1,bg="grey",fg="white",
@@ -404,7 +417,7 @@ class main():
             self.root.bind('<Return>',self.AuthCred)
             Label(self.root,text=f"{dt.datetime.now():%a %b%d %Y}",fg="white",bg="grey",font=("",11),width=12,
                 height=1).place(x=220,y=50)
-            see_img=ImageTk.PhotoImage(file='dat/IMG/view PNG.png')
+            see_img=ImageTk.PhotoImage(file='dat/view PNG.png')
             see=Button(self.root,text="",command=self.ViewEyeLogin,image=see_img)
             see.place(x=180,y=135)
             self.DigClockLogin()
@@ -449,7 +462,7 @@ class main():
             self.root.geometry('355x315')
             self.root.resizable(height=False, width=False)
             self.root.configure(bg='#737171')
-            self.root.iconbitmap('dat/IMG/form ICO.ico')
+            self.root.iconbitmap('dat/form ICO.ico')
             Label(self.root,bg="#b6c71c",height=220,width=1).place(x=220,y=0)#lime-yellow 1
             Label(self.root,bg="#f59911",height=220,width=1).place(x=245,y=0)#orange 1
             Label(self.root,bg="#cc4235",height=220,width=1).place(x=270,y=0)#red 1
@@ -470,15 +483,15 @@ class main():
             Label(self.root,text="Security Code:",bg='grey',fg='white').place(x=21,y=230)#security code
             Button(self.root,text="Create Account",height=1,width=13,bg="grey",fg="white",command=self.CheckCreds).place(x=21,y=270)
             Button(self.root,text="Login",height=1,width=6,bg="grey",fg="white",command=self.LoginButtonRegister).place(x=125,y=270)
-            ques_img=ImageTk.PhotoImage(file='dat/IMG/question_mark PNG.png')
+            ques_img=ImageTk.PhotoImage(file='dat/question_mark PNG.png')
             ques=Button(self.root,text="",command=self.HelpRegister)
             ques.config(image=ques_img)
             ques.place(x=180,y=270)
-            see1_img=ImageTk.PhotoImage(file='dat/IMG/view PNG.png')
+            see1_img=ImageTk.PhotoImage(file='dat/view PNG.png')
             see1=Button(self.root,text="",command=self.ViewTopEye)
             see1.config(image=see1_img)
             see1.place(x=180,y=130)
-            see2_img=ImageTk.PhotoImage(file='dat/IMG/view PNG.png')
+            see2_img=ImageTk.PhotoImage(file='dat/view PNG.png')
             see2=Button(self.root,text="",command=self.ViewBottomEye)
             see2.config(image=see2_img)
             see2.place(x=180,y=190)
@@ -550,7 +563,7 @@ class main():
             self.root.geometry('355x315')
             self.root.resizable(height=False, width=False)
             self.root.configure(bg='#737171')
-            self.root.iconbitmap('dat/IMG/reset ICO.ico')
+            self.root.iconbitmap('dat/reset ICO.ico')
             Label(self.root,bg="#b6c71c",height=220,width=1).place(x=220,y=0)#lime-yellow 1
             Label(self.root,bg="#f59911",height=220,width=1).place(x=245,y=0)#orange 1
             Label(self.root,bg="#cc4235",height=220,width=1).place(x=270,y=0)#red 1
@@ -572,15 +585,15 @@ class main():
             self.seccode.place(x=143,y=230)
             Button(self.root,text="Reset Password",height=1,width=13,bg="grey",fg="white",command=self.ResetPW).place(x=21,y=270)
             Button(self.root,text="Login",height=1,width=10,bg="grey",fg="white",command=self.Login).place(x=125,y=270)
-            see1_img=ImageTk.PhotoImage(file='dat/IMG/view PNG.png')
+            see1_img=ImageTk.PhotoImage(file='dat/view PNG.png')
             see1=Button(self.root,text="",command=self.ViewTopEye)
             see1.config(image=see1_img)
             see1.place(x=180,y=130)
-            see2_img=ImageTk.PhotoImage(file='dat/IMG/view PNG.png')
+            see2_img=ImageTk.PhotoImage(file='dat/view PNG.png')
             see2=Button(self.root,text="",command=self.ViewBottomEye)
             see2.config(image=see2_img)
             see2.place(x=180,y=190)
-            ques_img=ImageTk.PhotoImage(file='dat/IMG/question_mark PNG.png')
+            ques_img=ImageTk.PhotoImage(file='dat/question_mark PNG.png')
             ques=Button(self.root,text="",command=self.HelpReset)
             ques.config(image=ques_img)
             ques.place(x=180,y=228)
@@ -627,7 +640,4 @@ class main():
         def HelpReset(self):
             messagebox.showinfo("Rest Password Panel","The Security Code is the linked number given upon creating an account.")
 
-try:
-    main.login()
-except:
-    pass
+main.login()
