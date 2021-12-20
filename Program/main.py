@@ -148,6 +148,12 @@ class main():
         self.tick=-1
         self.suspended = False
         
+        entries = ['1117,Hour: ', '1200,Minute: ', '1300,Seconds: ']
+        for i in entries:
+            i, j = i.split(",")
+            exec(f'Label(self.root,text="{j}",bg="grey",fg="white").place(x={i},y=320)')
+        
+        
         self.SessionClock()
         self.DigClockMain()
         self.CalMain()
