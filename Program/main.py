@@ -123,21 +123,21 @@ class main():
         
         self.hour=StringVar()
         self.minute=StringVar()
-        self.second=StringVar()
+        self.second=StringVar() # String Variable, values change
         self.hour.set("")
         self.minute.set("")
-        self.second.set("")
+        self.second.set("") # Defaulted blank
         
         Label(self.root,text=":",fg='white',bg='#6B8282',font=("",20,'bold')).place(x=1208,y=350)
-        Label(self.root,text=":",fg='white',bg='#6B8282',font=("",20,'bold')).place(x=1283,y=350)
+        Label(self.root,text=":",fg='white',bg='#6B8282',font=("",20,'bold')).place(x=1283,y=350) # Label colon split
         
-        self.hrin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.hour).place(x=1150,y=340)
+        self.hrin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.hour).place(x=1150,y=340) 
         self.minin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.minute).place(x=1225,y=340)
-        self.secin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.second).place(x=1300,y=340)
+        self.secin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.second).place(x=1300,y=340) # Entries
         
-        self.startb=Button(self.root,text="Start",command=self.Start,width=7).place(x=1150,y=417)
-        self.stopb=Button(self.root,text="Stop",command=self.Stop,width=7).place(x=1225,y=417)
-        self.resetb=Button(self.root,text="Reset",command=self.Reset,width=7).place(x=1300,y=417)
+        self.startb=Button(self.root,text="Start",command=self.Start,width=7).place(x=1150,y=417) # Start button
+        self.stopb=Button(self.root,text="Stop",command=self.Stop,width=7).place(x=1225,y=417) # Stop button
+        self.resetb=Button(self.root,text="Reset",command=self.Reset,width=7).place(x=1300,y=417) # Reset button
         
         Label(self.root,bg='black',width=50).place(x=1100,y=465)
         Label(self.root,bg='#737171',height=30,width=50).place(x=1103,y=469)
@@ -146,13 +146,12 @@ class main():
         Label(self.root,bg="#f59911",height=22,width=6).place(x=1166,y=469)
         Label(self.root,bg="#cc4235",height=22,width=6).place(x=1229,y=469)
         Label(self.root,bg="#f59911",height=22,width=6).place(x=1293,y=469)
-        Label(self.root,bg="#b6c71c",height=22,width=6).place(x=1356,y=469)
+        Label(self.root,bg="#b6c71c",height=22,width=6).place(x=1356,y=469) # Program theme colours
         
         self.logo=False
         self.quit=False
         self.root.protocol("WM_DELETE_WINDOW",self.Quit)
         self.SW=None
-        self.clear=False
         self.tick=-1
         self.suspended = False
         
@@ -163,24 +162,24 @@ class main():
         
     def Start(self):
         if int(self.hour.get())==0 and int(self.minute.get())==0 and int(self.second.get())==0:
-            messagebox.showinfo("Stopwatch","Time not set.")
+            messagebox.showinfo("Stopwatch","Time not set.") # If the entires  are all 0
             
         elif int(self.hour.get())<0 or int(self.minute.get())<0 or int(self.second.get())<0:
-            messagebox.showinfo("Stopwatch","One or more values are less than zero.")
+            messagebox.showinfo("Stopwatch","One or more values are less than zero.") # Entries < 0
             
         else:
-            self.suspended=False
-            self.thread1=threading.Thread(target=self.Tick)
+            self.suspended=False # The timer isn't being held
+            self.thread1=threading.Thread(target=self.Tick) # Starting the stopwatch thread
             self.thread1.start()
         
     def Tick(self):
         try:
             temp=int(self.hour.get())*3600+int(self.minute.get())*60+int(self.second.get())
-            
+            # Get the current values of the entries held for HR:MIN:SEC
         except:
-            print("Invalid input.")
+            print("Invalid input.") # For all other values that dont follow the input format
             
-        while self.suspended==False and temp>-1:
+        while self.suspended==False and temp>-1: # The clock is not suspended and input time is positive
             mins,secs=divmod(temp,60)
             hours=0
             
@@ -188,14 +187,14 @@ class main():
                 hours,mins=divmod(mins,60)
             self.hour.set("{0:2d}".format(hours))
             self.minute.set("{0:2d}".format(mins))
-            self.second.set("{0:2d}".format(secs))
-            self.root.update()
-            time.sleep(1)
+            self.second.set("{0:2d}".format(secs)) # The time format to insert into the HR:MIN:SEC entries
+            self.root.update() # Update the new time to show on the main screen
+            time.sleep(1) # Time sleep acts as a one second tick pause
             
-            if (temp==0):
+            if (temp==0): # Combined time of stopwatch countdown is equal to 0
                 messagebox.showinfo("Stopwatch","Time ended.")
                 
-            temp-=1
+            temp-=1 # The value of temp is decremented
         
     def Stop(self):
         self.suspended=True
