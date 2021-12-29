@@ -85,7 +85,7 @@ class main():
         Button(self.root,text="Save Note",command=self.SaveNote,width=10,bg='#229954',fg='white').place(x=1213,y=210)
         
         self.cfrmsave=Label(self.root,text="",bg='#6B8282',fg='green',font=('arial',10,'bold'),width=9)
-        self.cfrmsave.place(x=1308,y=211) # Label to confirm saving edits to the txt file
+        self.cfrmsave.place(x=1308,y=211)
         Button(self.root,text="Get Date",command=self.GetDate,width=10).place(x=1308,y=248)
         self.dispdate=Label(self.root,text="",bg='#6B8282',fg='black',font=('arial',10,'bold'),width=9)
         self.dispdate.place(x=1308,y=285)
@@ -107,7 +107,7 @@ class main():
         self.Lab1.place(rely=0,relx=0)
         
         self.Tree=ttk.Treeview(self.TblFrame)
-        self.Tree.place(relheight=1,relwidth=1)
+        self.Tree.pack(fill='y',expand=True)
         self.ScrollYTbl=Scrollbar(self.TblFrame,orient="vertical",command=self.Tree.yview)
         self.ScrollXTbl=Scrollbar(self.TblFrame,orient="horizontal",command=self.Tree.xview)
         self.Tree.configure(xscrollcommand=self.ScrollXTbl.set,yscrollcommand=self.ScrollYTbl.set)
@@ -117,27 +117,31 @@ class main():
         self.TextFrame.place(height=700,width=654,rely=0,relx=.317)
         self.ScrollYTxt=Scrollbar(self.TextFrame,orient="vertical")
         self.ScrollYTxt.pack(side=RIGHT,fill=Y)
+        
         self.windtext=Text(self.TextFrame,font=('Helvetica',10),yscrollcommand=self.ScrollYTxt.set)
         self.windtext.pack(fill='both',expand=True)
         self.windtext.insert(END,'\n')
         
         self.hour=StringVar()
         self.minute=StringVar()
-        self.second=StringVar() # String Variable, values change
+        self.second=StringVar()
         self.hour.set("")
         self.minute.set("")
-        self.second.set("") # Defaulted blank
+        self.second.set("")
         
         Label(self.root,text=":",fg='white',bg='#6B8282',font=("",20,'bold')).place(x=1208,y=350)
-        Label(self.root,text=":",fg='white',bg='#6B8282',font=("",20,'bold')).place(x=1283,y=350) # Label colon split
+        Label(self.root,text=":",fg='white',bg='#6B8282',font=("",20,'bold')).place(x=1283,y=350)
         
-        self.hrin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.hour).place(x=1150,y=340) 
-        self.minin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.minute).place(x=1225,y=340)
-        self.secin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.second).place(x=1300,y=340) # Entries
+        self.hrin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.hour,insertofftime=0).place(x=1150,y=340) 
+        self.minin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.minute,insertofftime=0).place(x=1225,y=340)
+        self.secin=Entry(self.root,width=2,font=("Arial",35),textvariable=self.second,insertofftime=0).place(x=1300,y=340)
         
-        self.startb=Button(self.root,text="Start",command=self.Start,width=7).place(x=1150,y=417) # Start button
-        self.stopb=Button(self.root,text="Stop",command=self.Stop,width=7).place(x=1225,y=417) # Stop button
-        self.resetb=Button(self.root,text="Reset",command=self.Reset,width=7).place(x=1300,y=417) # Reset button
+        self.startb=Button(self.root,text="Start",command=self.Start,width=7)
+        self.startb.place(x=1150,y=417)
+        self.stopb=Button(self.root,text="Stop",command=self.Stop,width=7,state=DISABLED)
+        self.stopb.place(x=1225,y=417)
+        self.resetb=Button(self.root,text="Reset",command=self.Reset,width=7,state=DISABLED)
+        self.resetb.place(x=1300,y=417)
         
         Label(self.root,bg='black',width=50).place(x=1100,y=465)
         Label(self.root,bg='#737171',height=30,width=50).place(x=1103,y=469)
@@ -146,14 +150,14 @@ class main():
         Label(self.root,bg="#f59911",height=22,width=6).place(x=1166,y=469)
         Label(self.root,bg="#cc4235",height=22,width=6).place(x=1229,y=469)
         Label(self.root,bg="#f59911",height=22,width=6).place(x=1293,y=469)
-        Label(self.root,bg="#b6c71c",height=22,width=6).place(x=1356,y=469) # Program theme colours
+        Label(self.root,bg="#b6c71c",height=22,width=6).place(x=1356,y=469)
         
         self.logo=False
         self.quit=False
         self.root.protocol("WM_DELETE_WINDOW",self.Quit)
         self.SW=None
         self.tick=-1
-        self.suspended = False
+        self.suspended=False
         
         self.SessionClock()
         self.DigClockMain()
@@ -163,48 +167,50 @@ class main():
     def Start(self):
         if int(self.hour.get())==0 and int(self.minute.get())==0 and int(self.second.get())==0:
             messagebox.showinfo("Stopwatch","Time not set.") # If the entires  are all 0
-            
         elif int(self.hour.get())<0 or int(self.minute.get())<0 or int(self.second.get())<0:
-            messagebox.showinfo("Stopwatch","One or more values are less than zero.") # Entries < 0
-            
+            messagebox.showinfo("Stopwatch","One or more values are less than zero.")
         else:
-            self.suspended=False # The timer isn't being held
-            self.thread1=threading.Thread(target=self.Tick) # Starting the stopwatch thread
+            self.startb['state']=DISABLED
+            self.stopb['state']=NORMAL
+            self.resetb['state']=DISABLED
+            self.suspended=False
+            self.thread1=threading.Thread(target=self.Tick)
             self.thread1.start()
         
     def Tick(self):
         try:
             temp=int(self.hour.get())*3600+int(self.minute.get())*60+int(self.second.get())
-            # Get the current values of the entries held for HR:MIN:SEC
         except:
-            print("Invalid input.") # For all other values that dont follow the input format
+            print("Invalid input.")
             
-        while self.suspended==False and temp>-1: # The clock is not suspended and input time is positive
+        while self.suspended==False and temp>-1:
             mins,secs=divmod(temp,60)
             hours=0
-            
             if mins>60:
                 hours,mins=divmod(mins,60)
             self.hour.set("{0:2d}".format(hours))
             self.minute.set("{0:2d}".format(mins))
-            self.second.set("{0:2d}".format(secs)) # The time format to insert into the HR:MIN:SEC entries
-            self.root.update() # Update the new time to show on the main screen
-            time.sleep(1) # Time sleep acts as a one second tick pause
-            
-            if (temp==0): # Combined time of stopwatch countdown is equal to 0
+            self.second.set("{0:2d}".format(secs))
+            self.root.update()
+            time.sleep(1)
+            if (temp==0):
                 messagebox.showinfo("Stopwatch","Time ended.")
-                
-            temp-=1 # The value of temp is decremented
+            temp-=1
         
     def Stop(self):
+        self.startb['state']=NORMAL
+        self.stopb['state']=DISABLED
+        self.resetb['state']=NORMAL
         self.suspended=True
         
     def Reset(self):
         if self.suspended==True:
+            self.startb['state']=NORMAL
+            self.stopb['state']=DISABLED
+            self.resetb['state']=DISABLED
             self.hour.set("")
             self.minute.set("")
             self.second.set("")
-            
         else:
             messagebox.showinfo("Stopwatch","Stop timer before resetting.")
     
@@ -230,15 +236,13 @@ class main():
         
         if tot<10:
             pass
-        
         else:
             cur.execute(f"INSERT INTO sessions(start_time,end_time,secs,date,user_id) VALUES('{self.starttime}','{endtime}','{tot}','{date}','{self.UID}');")
             con.commit()
             
         if self.logo==True:
             self.root.destroy()
-            main.login()
-            
+            main.login()   
         if self.quit==True:
             self.root.destroy()
 
@@ -255,11 +259,9 @@ class main():
             self.windtext.delete('1.0','end')
             self.windtext.insert(END,rtxt)
             opcontent.close()
-            
         except ValueError:
             messagebox.showerror("","Invalid file type")
             return None
-        
         except FileNotFoundError:
             messagebox.showerror("","File does not exist or has been moved")
             return None
@@ -270,7 +272,6 @@ class main():
         
         if os.path.exists(self.ON.name):
             pass
-        
         else:
             shutil.copy(self.ON,cwd1)
             
@@ -311,17 +312,13 @@ class main():
         Path=self.OpenFile
         try:
             File=r'{}'.format(Path)
-            
             if File[-4]=='.csv':
-                self.df=pd.read_csv(File)
-                
+                self.df=pd.read_csv(File)   
             else:
-                self.df=pd.read_excel(File)      
-                
+                self.df=pd.read_excel(File)              
         except ValueError:
             messagebox.showerror("","Invalid file type")
             return None
-        
         except FileNotFoundError:
             messagebox.showerror("","File does not exist or has been moved")
             return None
@@ -333,7 +330,6 @@ class main():
         
         if os.path.exists(self.OF.name):
             pass
-        
         else:
             shutil.copy(self.OF,cwd1)
             
@@ -344,7 +340,8 @@ class main():
         
         for column in self.Tree['columns']:
             self.Tree.heading(column,text=column)
-            
+        
+        self.df.fillna('',inplace=True) # --> new line
         dfRows=self.df.to_numpy().tolist()
         
         for row in dfRows:
@@ -354,6 +351,10 @@ class main():
 
     def Purge(self):
         self.Tree.delete(*self.Tree.get_children())
+        
+        for heading in self.Tree['columns']:
+            self.Tree.heading(heading,text="")
+        
         self.Lab1['text']=""
         return None 
 
@@ -362,7 +363,6 @@ class main():
             text_input=time.strftime("%H:%M:%S")
             self.clock.config(text=text_input)
             self.clock.after(100,self.DigClockMain)
-            
         except:
             pass
 
@@ -371,7 +371,6 @@ class main():
             text_inp=f"{dt.datetime.now():%a %d %b %Y}"
             self.date.config(text=text_inp)
             self.date.after(100,self.CalMain)
-            
         except:
             pass
         
@@ -490,7 +489,6 @@ class main():
         def ViewEyeLogin(self):
             if self.pswd.cget('show')=='':
                 self.pswd.config(show='*')
-                
             else:
                 self.pswd.config(show='')
 
@@ -500,8 +498,7 @@ class main():
             cur.execute(f"SELECT username FROM users WHERE username='{self.UN}' AND password='{self.PW}';")
             
             if not cur.fetchall():
-                messagebox.showerror("Login Panel","Invalid credentials")
-                
+                messagebox.showerror("Login Panel","Invalid credentials") 
             else:
                 self.root.destroy()
                 main(self.UN)
@@ -510,14 +507,12 @@ class main():
             try:
                 text_input=time.strftime("%H:%M:%S")
                 self.clock.config(text=text_input)
-                self.clock.after(100,self.DigClockLogin)
-                
+                self.clock.after(100,self.DigClockLogin)    
             except:
                 pass
 
     class register():
         def __init__(self):
-            
             self.root=Tk()
             self.root.title("Register Panel")
             self.root.geometry('355x315')
@@ -573,27 +568,20 @@ class main():
             PWord=self.pswd.get()
             CFirm=self.cnfrm.get()
             cur.execute(f"SELECT username FROM users WHERE username='{UName}';")
-            
             if UName=="" or PWord=="":
                 messagebox.showerror("Register Panel","No entries given")
-                
             elif len(PWord)>10 or len(CFirm)>10 or len(UName)>10:
-                messagebox.showerror("Register Panel","Entries exceed limit")
-                
+                messagebox.showerror("Register Panel","Entries exceed limit")    
             elif PWord!=CFirm:
-                messagebox.showerror("Register Panel","Passwords do not match")
-                
+                messagebox.showerror("Register Panel","Passwords do not match")     
             elif cur.fetchall():
-                messagebox.showerror("Register Panel","This username is already taken")
-                
+                messagebox.showerror("Register Panel","This username is already taken")   
             else:
                 if 0<len(UName)<10 and 0<len(PWord)<10 and 0<len(CFirm)<10:
                     cwd=os.getcwd()
                     os.chdir(cwd+'/dat/usr')
-                    
                     if os.path.exists(UName):
                         a=messagebox.showerror("Register Panel","Error occured creating user dir: User dir already exists.")
-                        
                         if a:
                             self.root.destroy()  
                     else: 
@@ -604,17 +592,13 @@ class main():
                         os.chdir(cwd)
                         UID=random.randint(1000,9999)
                         cur.execute(f"SELECT security_code FROM users WHERE security_code='{UID}';")
-                        
                         if not cur.fetchall():
                             cur.execute(f"INSERT INTO users(username,password,security_code) VALUES('{UName}','{PWord}','{UID}');")
                             con.commit()
-                            
                             Label(self.root,text=UID,font=("",9),bg='grey',fg='white',width=10).place(x=130,y=230)
                             messagebox.showwarning("Register Panel","Please take note of your security code then proceed to login.")
-                            
                             self.root.destroy()
-                            main.login()
-                            
+                            main.login()     
                         else:
                             messagebox.showinfo("Register Panel","An error has occured. Please try again.")
 
@@ -624,15 +608,13 @@ class main():
 
         def ViewTopEye(self):
             if self.pswd.cget('show')=='':
-                self.pswd.config(show='*')
-                
+                self.pswd.config(show='*')    
             else:
                 self.pswd.config(show='')
 
         def ViewBottomEye(self):
             if self.cnfrm.cget('show')=='':
-                self.cnfrm.config(show='*')
-                
+                self.cnfrm.config(show='*')  
             else:
                 self.cnfrm.config(show='')
 
@@ -654,16 +636,16 @@ class main():
             Label(self.root,text="Reset Password :",relief=RAISED,font=("helvetica",12),width=20,bg='grey',
                 fg='white').place(x=21,y=15)
             
-            Label(self.root,text="Username:",bg='grey',fg='white').place(x=21,y=50)#username
+            Label(self.root,text="Username:",bg='grey',fg='white').place(x=21,y=50)
             self.usrnme=Entry(self.root,width=30)
             self.usrnme.place(x=21,y=70)
-            Label(self.root,text="New Password:",bg='grey',fg='white').place(x=21,y=110)#password
+            Label(self.root,text="New Password:",bg='grey',fg='white').place(x=21,y=110)
             self.pswd=Entry(self.root,width=25,show='*')
             self.pswd.place(x=21,y=130)
-            Label(self.root,text="Confirm New Password:",bg='grey',fg='white').place(x=21,y=170)#confirm password
+            Label(self.root,text="Confirm New Password:",bg='grey',fg='white').place(x=21,y=170)
             self.cnfrm=Entry(self.root,width=25,show='*')
             self.cnfrm.place(x=21,y=190)
-            Label(self.root,text="Enter Security Code:",bg='grey',fg='white').place(x=21,y=230)#security code
+            Label(self.root,text="Enter Security Code:",bg='grey',fg='white').place(x=21,y=230)
             self.seccode=Entry(self.root,width=4)
             self.seccode.place(x=143,y=230)
             
@@ -690,22 +672,16 @@ class main():
             NewPW=self.pswd.get()
             ConfPW=self.cnfrm.get()
             SecCode=self.seccode.get()
-            
             if ConfPW=="" or NewPW=="":
-                messagebox.showerror("Register Panel","No entries given")
-                
+                messagebox.showerror("Register Panel","No entries given")    
             elif len(NewPW)>10 or len(ConfPW)>10 or len(UName)>10:
-                messagebox.showerror("Register Panel","Entries exceed limit")
-                
+                messagebox.showerror("Register Panel","Entries exceed limit")    
             elif NewPW!=ConfPW:
-                messagebox.showerror("Register Panel","Passwords do not match")
-                
+                messagebox.showerror("Register Panel","Passwords do not match")     
             else:
                 cur.execute((f"SELECT security_code FROM users WHERE username='{UName}' AND security_code='{SecCode}';"))
-                
                 if not cur.fetchall():
-                    messagebox.showerror("Reset Password Panel","Username and Security Code do not match.")
-                    
+                    messagebox.showerror("Reset Password Panel","Username and Security Code do not match.")    
                 else:
                     cur.execute(f"UPDATE users SET password='{NewPW}' WHERE security_code='{SecCode}';")
                     con.commit()
@@ -720,15 +696,13 @@ class main():
             
         def ViewTopEye(self):
             if self.pswd.cget('show')=='':
-                self.pswd.config(show='*')
-                
+                self.pswd.config(show='*')    
             else:
                 self.pswd.config(show='')
 
         def ViewBottomEye(self):
             if self.cnfrm.cget('show')=='':
-                self.cnfrm.config(show='*')
-                
+                self.cnfrm.config(show='*')    
             else:
                 self.cnfrm.config(show='')
 
