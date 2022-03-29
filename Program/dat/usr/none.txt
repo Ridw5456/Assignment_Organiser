@@ -1,1 +1,3 @@
-none
+None file, will not be used by the program.
+
+:)
